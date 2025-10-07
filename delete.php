@@ -9,5 +9,6 @@ if (isset($_GET['id'])) {
 
     addLog("DELETE", "Xóa khách hàng ID: $id");
     echo "Xóa thành công!";
+    addLog("DELETE", "Xóa khách hàng ID: $id");
 }
 ?>

@@ -23,5 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->execute();
     addLog("UPDATE", "Sửa khách hàng ID: $id");
     echo "Cập nhật thành công!";
+    addLog("UPDATE", "Sửa khách hàng ID: $id");
 }
+
 ?>

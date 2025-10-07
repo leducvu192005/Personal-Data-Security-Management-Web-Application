@@ -13,5 +13,6 @@ while ($row = $result->fetch_assoc()) {
 
     echo "SĐT: " . $phone . "<br>";
     echo "CMND: " . $cmnd . "<br><hr>";
+    addLog("READ", "Xem thông tin khách hàng ID: " . $row['id']);
 }
 ?>

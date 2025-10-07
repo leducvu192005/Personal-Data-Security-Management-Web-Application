@@ -18,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     addLog("CREATE", "Thêm khách hàng: $email");
 
     echo "✅ Thêm thành công!";
+    addLog("CREATE", "Thêm khách hàng: $email");
 }
 ?>
 

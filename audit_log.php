@@ -1,9 +1,9 @@
 <?php
-require 'functions.php';
+require 'config.php'; // chứa $pdo
 
-$result = $conn->query("SELECT * FROM audit_log ORDER BY created_at DESC");
+$stmt = $pdo->query("SELECT * FROM logs ORDER BY created_at DESC");
 
-while ($row = $result->fetch_assoc()) {
-    echo "[" . $row['created_at'] . "] " . $row['action'] . " - " . $row['details'] . "<br>";
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    echo "[" . $row['created_at'] . "] " . $row['user_action'] . " - " . $row['details'] . "<br>";
 }
 ?>
