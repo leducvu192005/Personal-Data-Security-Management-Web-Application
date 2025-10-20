@@ -120,7 +120,6 @@ $recent_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <a href="audit_log.php">📋 Nhật ký hoạt động</a>
     <a href="../public/logout.php">🚪 Đăng xuất</a>
 </div>
-
 <h3>🕓 Hoạt động gần đây</h3>
 <table>
     <tr>
@@ -131,12 +130,21 @@ $recent_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </tr>
     <?php if (count($recent_logs) > 0): ?>
         <?php foreach ($recent_logs as $log): ?>
-        <tr>
-            <td><?= htmlspecialchars($log['username']) ?></td>
-            <td><?= htmlspecialchars($log['action']) ?></td>
-            <td><?= htmlspecialchars($log['masked_data']) ?></td>
-            <td><?= htmlspecialchars($log['created_at']) ?></td>
-        </tr>
+            <?php
+                // Giải mã JSON để lấy phần "DETAIL" và "URI"
+                $masked = json_decode($log['masked_data'], true);
+                $detail = $masked['DETAIL'] ?? '(Không có chi tiết)';
+                $uri = $masked['URI'] ?? '';
+            ?>
+            <tr>
+                <td><?= htmlspecialchars($log['username'] ?? 'Hệ thống') ?></td>
+                <td><?= htmlspecialchars($log['action']) ?></td>
+                <td>
+                    <?= htmlspecialchars($detail) ?><br>
+                    <small style="color: gray;">Trang: <?= htmlspecialchars($uri) ?></small>
+                </td>
+                <td><?= htmlspecialchars($log['created_at']) ?></td>
+            </tr>
         <?php endforeach; ?>
     <?php else: ?>
         <tr><td colspan="4" style="text-align:center;">Chưa có hoạt động nào được ghi lại.</td></tr>

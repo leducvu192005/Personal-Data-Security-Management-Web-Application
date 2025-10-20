@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/encryption.php';
-require_once __DIR__ . '/../includes/activity_logger.php'; // ✅ Đảm bảo có hàm addLog()
+require_once __DIR__ . '/../includes/activity_logger.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -14,7 +14,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'customer') {
 
 $user_id = $_SESSION['user_id'];
 
-// ✅ Lấy thông tin hiện tại
+// ✅ Lấy thông tin hiện tại của người dùng
 $stmt = $conn->prepare("
     SELECT u.username, u.email, c.phone, c.cmnd
     FROM users u
@@ -52,27 +52,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $conn->commit();
 
-            // ✅ Ghi log chi tiết với dữ liệu ẩn
-            $maskedPhone = maskData($phone, 3);
-            $maskedCMND = maskData($cmnd, 3);
+            // ✅ Ghi log an toàn (ẩn dữ liệu nhạy cảm)
+          // ✅ Ghi log gọn gàng, không lưu dữ liệu chi tiết
+logActivity(
+    'Cập nhật thông tin cá nhân',
+    [
+        'message' => "Khách hàng {$username} (ID {$user_id}) đã cập nhật hồ sơ cá nhân."
+    ]
+);
 
-            addLog(
-                $user_id,
-                'UPDATE_PROFILE',
-                [
-                    'username' => $username,
-                    'email' => $email,
-                    'phone' => $maskedPhone,
-                    'cmnd' => $maskedCMND
-                ],
-                'Người dùng cập nhật thông tin cá nhân'
-            );
 
             header("Location: index.php?success=1");
             exit;
         } catch (Exception $e) {
             $conn->rollBack();
-            addLog($user_id, 'ERROR', "Lỗi khi cập nhật hồ sơ: " . $e->getMessage());
+            logActivity('Lỗi cập nhật thông tin', [
+                'error' => $e->getMessage()
+            ]);
             echo "<script>alert('Lỗi khi cập nhật: " . addslashes($e->getMessage()) . "');</script>";
         }
     }
@@ -86,7 +82,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../../assets/style.css">
     <style>
         body { font-family: Arial, sans-serif; background: #f3f3f3; padding: 20px; }
-        .container { background: #fff; padding: 25px; border-radius: 10px; width: 420px; margin: 50px auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .container {
+            background: #fff; padding: 25px; border-radius: 10px;
+            width: 420px; margin: 50px auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
         h2 { text-align: center; margin-bottom: 20px; }
         form { display: flex; flex-direction: column; }
         label { margin-top: 10px; font-weight: bold; }

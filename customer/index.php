@@ -13,15 +13,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'customer') {
 
 $user_id = $_SESSION['user_id'];
 
-// ✅ Lấy thông tin người dùng trước
+// Lấy thông tin người dùng
 $stmt = $conn->prepare("SELECT username, email FROM users WHERE id = ? LIMIT 1");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// ✅ Ghi log sau khi đã có dữ liệu người dùng
+// ✅ Ghi log “xem thông tin”
 if ($user) {
-    logActivity('xem thông tin cá nhân', "Khách hàng {$user['username']} xem thông tin cá nhân");
-
+    logActivity('XEM_THONG_TIN', 'đã xem thông tin cá nhân');
 }
 ?>
 <!DOCTYPE html>
@@ -31,32 +30,17 @@ if ($user) {
     <title>Thông tin cá nhân</title>
     <link rel="stylesheet" href="../../assets/style.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f3f3f3;
-            padding: 20px;
-        }
+        body { font-family: Arial, sans-serif; background: #f3f3f3; padding: 20px; }
         .container {
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            width: 400px;
-            margin: 50px auto;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: #fff; padding: 20px; border-radius: 10px;
+            width: 400px; margin: 50px auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             text-align: center;
         }
         .btn {
-            display: inline-block;
-            background: #007bff;
-            color: #fff;
-            padding: 10px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            margin: 5px;
+            display: inline-block; background: #007bff; color: #fff;
+            padding: 10px 15px; border-radius: 5px; text-decoration: none; margin: 5px;
         }
-        .btn:hover {
-            background: #0056b3;
-        }
+        .btn:hover { background: #0056b3; }
     </style>
 </head>
 <body>

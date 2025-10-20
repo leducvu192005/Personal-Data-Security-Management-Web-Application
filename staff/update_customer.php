@@ -3,7 +3,8 @@ session_start();
 require_once "../config/db.php";
 require_once "../includes/auth.php";
 require_once "../includes/functions.php";
-require_once "../includes/encryption.php"; // ✅ Thêm dòng này để dùng decrypt/encrypt
+require_once "../includes/encryption.php";
+require_once "../includes/activity_logger.php"; // ✅ Thêm để ghi log
 
 ensureLoggedIn();
 checkRole('staff');
@@ -15,7 +16,7 @@ if ($id <= 0) die("❌ ID khách hàng không hợp lệ!");
 $staff_id = $_SESSION['user_id'] ?? 0;
 $username = $_SESSION['username'] ?? 'unknown';
 
-// ✅ Lấy thông tin khách hàng từ DB
+// ✅ Lấy thông tin khách hàng
 $stmt = $conn->prepare("SELECT * FROM customers WHERE id = ?");
 $stmt->execute([$id]);
 $customer = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -40,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        // ✅ Mã hóa lại trước khi lưu
+        // ✅ Cập nhật dữ liệu
         $stmt = $conn->prepare("
             UPDATE customers
             SET name=?, email=?, phone=?, cmnd=?
@@ -54,11 +55,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id
         ]);
 
-        addLog($staff_id, 'UPDATE_CUSTOMER', "Nhân viên {$username} cập nhật khách hàng ID {$id}");
+        // ✅ Ghi log (ẩn dữ liệu nhạy cảm)
+        logActivity(
+            'CẬP_NHẬT_KHÁCH_HÀNG',
+            [
+                'message' => "Nhân viên {$username} (ID {$staff_id}) đã cập nhật khách hàng ID {$id}",
+                'customer_id' => $id,
+                'fields_updated' => ['name', 'email', 'phone', 'cmnd']
+            ]
+        );
 
         echo "<script>alert('✅ Cập nhật thành công!'); window.location.href='index.php';</script>";
         exit;
     } catch (PDOException $e) {
+        // ✅ Ghi log lỗi
+        logActivity(
+            'LỖI_CẬP_NHẬT_KHÁCH_HÀNG',
+            [
+                'message' => "Nhân viên {$username} (ID {$staff_id}) gặp lỗi khi cập nhật khách hàng ID {$id}",
+                'error' => $e->getMessage()
+            ]
+        );
+
         echo "<script>alert('❌ Lỗi khi cập nhật: " . addslashes($e->getMessage()) . "');</script>";
     }
 }
