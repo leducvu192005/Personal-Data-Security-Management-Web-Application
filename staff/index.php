@@ -69,15 +69,14 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </tr>
         <?php foreach ($customers as $c): ?>
         <tr>
-            <td><?= $c['id'] ?></td>
+            <td><?= $c['user_id'] ?></td>
             <td><?= htmlspecialchars($c['name']) ?></td>
             <td><?= htmlspecialchars($c['email']) ?></td>
             <td><?= htmlspecialchars($c['phone']) ?></td>
             <td><?= maskData(decryptData($c['cmnd'])) ?></td>
             <td><?= htmlspecialchars($c['created_at']) ?></td>
             <td>
-                <a href="update_customer.php?id=<?= $c['id'] ?>">Sửa</a> |
-                <a href="delete_customer.php?id=<?= $c['id'] ?>" onclick="return confirm('Xóa khách hàng này?')">Xóa</a>
+                <a href="update_customer.php?id=<?= $c['user_id'] ?>">Sửa</a> 
             </td>
         </tr>
         <?php endforeach; ?>

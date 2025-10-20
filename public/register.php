@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$user_id, $name, $email, $enc_phone, $enc_cmnd]);
 
         // 🧾 Ghi log
-        addLog($user_id, 'REGISTER', "Khách hàng mới đăng ký: $email");
+        addLog($id, 'REGISTER', "Khách hàng mới đăng ký: $email");
 
         $conn->commit();
 
