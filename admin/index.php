@@ -21,10 +21,16 @@ $stmt = $conn->query("SELECT COUNT(*) AS total_logs FROM audit_logs");
 $total_logs = $stmt->fetch(PDO::FETCH_ASSOC)['total_logs'];
 
 // Lấy danh sách log gần nhất
-$stmt = $conn->query("SELECT a.action, a.masked_data, a.created_at, u.username 
-                     FROM audit_logs a 
-                     JOIN users u ON a.user_id = u.id 
-                     ORDER BY a.created_at DESC LIMIT 5");
+$stmt = $conn->query("
+    SELECT a.action, a.masked_data, a.created_at, u.username
+    FROM audit_logs a
+    LEFT JOIN users u ON a.user_id = u.id
+    ORDER BY a.created_at DESC
+    LIMIT 5
+");
+
+
+
 $recent_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -110,8 +116,7 @@ $recent_logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <div class="links">
     <a href="staff_list.php">👨‍💼 Quản lý nhân viên</a>
     <a href="create_staff.php">➕ Thêm nhân viên</a>
-    <a href="update_staff.php">Sửa nhân viên</a>
-    <a href="delete_staff.php">Xóa nhân viên</a>
+
     <a href="audit_log.php">📋 Nhật ký hoạt động</a>
     <a href="../public/logout.php">🚪 Đăng xuất</a>
 </div>

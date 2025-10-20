@@ -17,6 +17,8 @@ $search = $_GET['search'] ?? '';
 
 // Lấy danh sách nhân viên
 $staffs = get_staff_list($admin_id, $search);
+addLog($admin_id, 'VIEW_STAFF_LIST', 'Xem danh sách nhân viên');
+
 ?>
 
 

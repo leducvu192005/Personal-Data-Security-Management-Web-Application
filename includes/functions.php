@@ -5,17 +5,27 @@ require_once __DIR__ . '/encryption.php';
 /**
  * Ghi log hoạt động của người dùng
  */
-function addLog($user_id, $action, $detail) {
+function addLog($user_id, $action, $data_snapshot = null, $masked_data = null) {
     global $conn;
+
     try {
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+
+        // Ép kiểu dữ liệu sang JSON để lưu dễ hơn
+        if (is_array($data_snapshot)) {
+            $data_snapshot = json_encode($data_snapshot, JSON_UNESCAPED_UNICODE);
+        }
+        if (is_array($masked_data)) {
+            $masked_data = json_encode($masked_data, JSON_UNESCAPED_UNICODE);
+        }
+
         $stmt = $conn->prepare("
-            INSERT INTO audit_log (user_id, action, detail, ip_address, created_at)
-            VALUES (?, ?, ?, ?, NOW())
+            INSERT INTO audit_log (user_id, action, data_snapshot, masked_data, ip_address, created_at)
+            VALUES (?, ?, ?, ?, ?, NOW())
         ");
-        $stmt->execute([$user_id, $action, $detail, $ip]);
+        $stmt->execute([$user_id, $action, $data_snapshot, $masked_data, $ip]);
     } catch (Exception $e) {
-        error_log("Không thể ghi log: " . $e->getMessage());
+        error_log("❌ Không thể ghi log: " . $e->getMessage());
     }
 }
 

@@ -1,7 +1,11 @@
 <?php
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/encryption.php';
-session_start();
+require_once __DIR__ . '/../includes/activity_logger.php'; // ✅ Đảm bảo có hàm addLog()
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'customer') {
     header('Location: ../login.php');
@@ -10,7 +14,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'customer') {
 
 $user_id = $_SESSION['user_id'];
 
-// Lấy thông tin hiện tại
+// ✅ Lấy thông tin hiện tại
 $stmt = $conn->prepare("
     SELECT u.username, u.email, c.phone, c.cmnd
     FROM users u
@@ -18,9 +22,9 @@ $stmt = $conn->prepare("
     WHERE u.id = ?
 ");
 $stmt->execute([$user_id]);
-$user = $stmt->fetch();
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Giải mã dữ liệu nhạy cảm (nếu có)
+// ✅ Giải mã dữ liệu nhạy cảm (nếu có)
 $decrypted_phone = $user['phone'] ? decryptData($user['phone']) : '';
 $decrypted_cmnd  = $user['cmnd']  ? decryptData($user['cmnd'])  : '';
 
@@ -31,28 +35,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $cmnd     = trim($_POST['cmnd']);
 
     if ($username && $email && $phone && $cmnd) {
-        // Mã hóa lại phone & cmnd trước khi lưu
+        // ✅ Mã hóa dữ liệu nhạy cảm
         $enc_phone = encryptData($phone);
         $enc_cmnd  = encryptData($cmnd);
 
         try {
             $conn->beginTransaction();
 
-            // Cập nhật bảng users
+            // ✅ Cập nhật bảng users
             $stmt = $conn->prepare("UPDATE users SET username = ?, email = ? WHERE id = ?");
             $stmt->execute([$username, $email, $user_id]);
 
-            // Cập nhật bảng customers
+            // ✅ Cập nhật bảng customers
             $stmt = $conn->prepare("UPDATE customers SET phone = ?, cmnd = ? WHERE user_id = ?");
             $stmt->execute([$enc_phone, $enc_cmnd, $user_id]);
 
             $conn->commit();
 
-            addLog($user_id, 'UPDATE_PROFILE', "Cập nhật thông tin cá nhân thành công.");
+            // ✅ Ghi log chi tiết với dữ liệu ẩn
+            $maskedPhone = maskData($phone, 3);
+            $maskedCMND = maskData($cmnd, 3);
+
+            addLog(
+                $user_id,
+                'UPDATE_PROFILE',
+                [
+                    'username' => $username,
+                    'email' => $email,
+                    'phone' => $maskedPhone,
+                    'cmnd' => $maskedCMND
+                ],
+                'Người dùng cập nhật thông tin cá nhân'
+            );
+
             header("Location: index.php?success=1");
             exit;
         } catch (Exception $e) {
             $conn->rollBack();
+            addLog($user_id, 'ERROR', "Lỗi khi cập nhật hồ sơ: " . $e->getMessage());
             echo "<script>alert('Lỗi khi cập nhật: " . addslashes($e->getMessage()) . "');</script>";
         }
     }

@@ -1,6 +1,10 @@
 <?php
 require_once __DIR__ . '/../includes/functions.php';
-session_start();
+require_once __DIR__ . '/../includes/activity_logger.php';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'customer') {
     header('Location: ../login.php');
@@ -8,9 +12,17 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'customer') {
 }
 
 $user_id = $_SESSION['user_id'];
+
+// ✅ Lấy thông tin người dùng trước
 $stmt = $conn->prepare("SELECT username, email FROM users WHERE id = ? LIMIT 1");
 $stmt->execute([$user_id]);
-$user = $stmt->fetch();
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// ✅ Ghi log sau khi đã có dữ liệu người dùng
+if ($user) {
+    logActivity('xem thông tin cá nhân', "Khách hàng {$user['username']} xem thông tin cá nhân");
+
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -31,9 +43,6 @@ $user = $stmt->fetch();
             width: 400px;
             margin: 50px auto;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        h2 {
             text-align: center;
         }
         .btn {

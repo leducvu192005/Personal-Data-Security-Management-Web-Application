@@ -4,7 +4,8 @@ if(session_status() ===    PHP_SESSION_NONE ){
 }
 function ensureLoggedIn() {
     if (!isset($_SESSION['user_id'])) {
-        header("Location: ../login.php");
+        header("Location: ../public/login.php");
+
         exit;
     }
 }

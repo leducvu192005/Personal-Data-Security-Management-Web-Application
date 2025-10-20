@@ -4,7 +4,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once '../includes/functions.php';
 require_once '../config/db.php'; // Đảm bảo kết nối PDO có trong file này
-
+require_once __DIR__ . '/../includes/activity_logger.php';
+logActivity('CREATE_STAFF',"Thêm nhân viên mới:{$name}");
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'];
     $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
